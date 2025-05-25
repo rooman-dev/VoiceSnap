@@ -63,47 +63,38 @@ class VoiceSnapGUI:
         friends = self.client.get_friends() if self.client else []
         for friend in friends:
             frame = tb.Frame(self.user_list_frame, bootstyle="light")
-            # Larger, rounded label for username
             user_label = tb.Label(
                 frame,
                 text=friend,
                 width=18,
                 anchor="w",
                 bootstyle="light",
-                font=("Segoe UI Rounded", 16, "bold"),
+                font=("Segoe UI Rounded", 18, "bold"),
                 foreground="#222",
                 borderwidth=0,
                 relief="flat",
                 background="#f4f6fb",
-                padding=(16, 8)
+                padding=(24, 14)
             )
-            user_label.pack(side=tk.LEFT, padx=(10, 8), pady=8, fill="x")
-            user_label.configure(style="RoundedUser.TLabel")
-            # Rounded icon button
+            user_label.pack(side=tk.LEFT, padx=(16, 12), pady=12, fill="x")
+
             hold_btn = tb.Button(
                 frame,
                 text="🎤",
                 bootstyle="success-outline round-toolbutton",
-                width=3,
-                style="RoundedIcon.TButton"
+                width=3
             )
-            hold_btn.pack(side=tk.LEFT, padx=8, pady=8)
+            hold_btn.pack(side=tk.LEFT, padx=12, pady=12)
             hold_btn.bind('<ButtonPress-1>', lambda e, f=friend: self.start_recording(f, False))
             hold_btn.bind('<ButtonRelease-1>', lambda e, f=friend: self.stop_recording(f, False))
-            # Reverse hover effect
             def on_enter(e, btn=hold_btn):
                 btn.configure(bootstyle="success dark round-toolbutton")
             def on_leave(e, btn=hold_btn):
                 btn.configure(bootstyle="success-outline round-toolbutton")
             hold_btn.bind("<Enter>", on_enter)
             hold_btn.bind("<Leave>", on_leave)
-            frame.pack(fill="x", pady=10, padx=10)
+            frame.pack(fill="x", pady=16, padx=16)
             self.user_buttons[friend] = frame
-
-        # Custom style for rounded label (optional, for ttkbootstrap >=1.10)
-        style = tb.Style()
-        style.configure("RoundedUser.TLabel", borderwidth=0, relief="flat", background="#f4f6fb", padding=12, font=("Segoe UI Rounded", 16, "bold"))
-        style.configure("RoundedIcon.TButton", borderwidth=0, focusthickness=3, focuscolor="#38b000", font=("Segoe UI", 14))
 
     def add_user(self):
         target = simpledialog.askstring("Add User", "Enter username:")
