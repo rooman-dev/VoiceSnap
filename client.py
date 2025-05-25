@@ -5,6 +5,7 @@ import pickle
 import time
 from config import SERVER_HOST, SERVER_PORT, BUFFER_SIZE
 from audio_utils import play_audio
+from net_utils import send_packet, recv_packet
 
 class VoiceClient:
     def __init__(self, username, on_friend_request=None, on_group_invite=None):
@@ -22,11 +23,10 @@ class VoiceClient:
     def listen(self):
         while True:
             try:
-                data = self.sock.recv(BUFFER_SIZE)
-                if not data:
+                packet = recv_packet(self.sock)
+                if not packet:
                     break
                 try:
-                    packet = pickle.loads(data)
                     self.handle_packet(packet)
                 except Exception as e:
                     print(f"Packet error: {e}")
@@ -65,44 +65,44 @@ class VoiceClient:
             'is_group': is_group,
             'data': data
         }
-        self.sock.send(pickle.dumps(packet))
+        send_packet(self.sock, packet)
 
     def send_friend_request(self, target):
-        self.sock.send(pickle.dumps({
+        send_packet(self.sock, {
             'type': 'friend_request',
             'from': self.username,
             'to': target
-        }))
+        })
 
     def respond_friend_request(self, from_user, accept):
-        self.sock.send(pickle.dumps({
+        send_packet(self.sock, {
             'type': 'friend_response',
             'from': self.username,
             'to': from_user,
             'accept': accept
-        }))
+        })
 
     def create_group(self, group_name, members):
-        self.sock.send(pickle.dumps({
+        send_packet(self.sock, {
             'type': 'group_create',
             'from': self.username,
             'group': group_name,
             'members': members
-        }))
+        })
 
     def respond_group_invite(self, group_name, accept):
-        self.sock.send(pickle.dumps({
+        send_packet(self.sock, {
             'type': 'group_response',
             'from': self.username,
             'group': group_name,
             'accept': accept
-        }))
+        })
 
     def get_friends(self):
-        self.sock.send(pickle.dumps({
+        send_packet(self.sock, {
             'type': 'get_friends',
             'from': self.username
-        }))
+        })
         # Wait for the friends list to be updated by handle_packet
         for _ in range(10):
             if self.friends:
@@ -111,10 +111,10 @@ class VoiceClient:
         return list(self.friends)
 
     def get_groups(self):
-        self.sock.send(pickle.dumps({
+        send_packet(self.sock, {
             'type': 'get_groups',
             'from': self.username
-        }))
+        })
         # Wait for the groups list to be updated by handle_packet
         for _ in range(10):
             if self.groups:
