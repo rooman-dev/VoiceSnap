@@ -1,4 +1,3 @@
-VoiceSnap
 VoiceSnap is a modern, real-time voice messaging application built with Python. It enables users to send and receive short audio messages instantly—just like a digital walkie-talkie—across a local network or the internet. VoiceSnap features a beautiful, responsive GUI, friend and group management, and automatic playback of received messages for a seamless, interactive experience.
 
 Features
