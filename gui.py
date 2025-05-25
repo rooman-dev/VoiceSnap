@@ -122,7 +122,7 @@ class VoiceSnapGUI:
         frame.pack(fill=tk.BOTH, expand=True)
         self.group_list_frame = tb.Frame(frame, bootstyle="light")
         self.group_list_frame.pack(fill=tk.BOTH, expand=True)
-        refresh_btn = tb.Button(frame, text="🔄 Refresh", command=self.update_group_list, bootstyle="info-outline")
+        refresh_btn = tb.Button(frame, text="🔄", command=self.update_group_list, bootstyle="info-outline")
         refresh_btn.pack(side=tk.LEFT, padx=5, pady=5)
         create_btn = tb.Button(frame, text="➕ Create Group", command=self.create_group, bootstyle="success-outline")
         create_btn.pack(side=tk.LEFT, padx=5, pady=5)
