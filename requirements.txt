@@ -1,5 +1,4 @@
 sounddevice
 scipy
 simpleaudio
-tk
-PyQt5
+ttkbootstrap

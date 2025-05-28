@@ -2,28 +2,43 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 import threading
-from audio_utils import record_audio
 from client import VoiceClient
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 
-MAX_VOICE_DURATION = 30  # seconds, can be adjusted or made into a setting
+MAX_VOICE_DURATION = 30  # seconds
 
 class VoiceSnapGUI:
     def __init__(self, username):
         self.username = username
-        self.root = tb.Window(themename="pulse")  # Try "cosmo", "superhero", etc. for other looks
+        self.root = tb.Window(themename="pulse")
         self.root.title("VoiceSnap")
-        self.root.geometry("600x600")
+        self.root.geometry("650x700")
         self.root.resizable(False, False)
         self.setup_theme()
 
-        # Username label at the top
-        username_label = tb.Label(self.root, text=f"Logged in as: {self.username}", bootstyle="inverse-light", font=("Arial", 14, "bold"))
-        username_label.pack(pady=(10, 0))
+        username_label = tb.Label(
+            self.root,
+            text=f"Logged in as: {self.username}",
+            bootstyle="inverse-light",
+            font=("Segoe UI Rounded", 18, "bold"),
+            anchor="center",
+            padding=(10, 10)
+        )
+        username_label.pack(pady=(10, 0), fill="x")
+
+        self.recording_indicator = tb.Label(
+            self.root,
+            text="● Recording...",
+            font=("Segoe UI", 13, "bold"),
+            foreground="#e63946",
+            bootstyle="danger"
+        )
+        self.recording_indicator.pack(pady=(0, 5))
+        self.recording_indicator.pack_forget()
 
         self.client = VoiceClient(
-            username,
+            self.username,
             on_friend_request=self.on_friend_request,
             on_group_invite=self.on_group_invite
         )
@@ -33,7 +48,7 @@ class VoiceSnapGUI:
         self.group_tab = tb.Frame(self.tabs)
         self.tabs.add(self.user_tab, text="Users")
         self.tabs.add(self.group_tab, text="Groups")
-        self.tabs.pack(expand=1, fill="both")
+        self.tabs.pack(expand=1, fill="both", padx=10, pady=10)
 
         self.init_user_tab()
         self.init_group_tab()
@@ -43,20 +58,21 @@ class VoiceSnapGUI:
 
     def setup_theme(self):
         style = tb.Style()
-        style.configure('TButton', font=('Segoe UI', 11), padding=6)
-        style.configure('TLabel', font=('Segoe UI', 11))
-        style.configure('TNotebook.Tab', font=('Segoe UI', 11, 'bold'))
+        style.configure('TButton', font=('Segoe UI', 12), padding=8)
+        style.configure('TLabel', font=('Segoe UI Rounded', 13))
+        style.configure('TNotebook.Tab', font=('Segoe UI Rounded', 12, 'bold'))
 
     def init_user_tab(self):
         frame = tb.Frame(self.user_tab, padding=10, bootstyle="light")
         frame.pack(fill=tk.BOTH, expand=True)
         self.user_list_frame = tb.Frame(frame, bootstyle="light")
-        self.user_list_frame.pack(fill=tk.BOTH, expand=True)
-        refresh_btn = tb.Button(frame, text="🔄 Refresh", command=self.update_user_list, bootstyle="info-outline")
+        self.user_list_frame.pack(fill=tk.BOTH, expand=True, pady=(10, 0))
+        btn_frame = tb.Frame(frame, bootstyle="light")
+        btn_frame.pack(fill="x", pady=(10, 0))
+        refresh_btn = tb.Button(btn_frame, text="🔄 Refresh", command=self.update_user_list, bootstyle="info-outline")
         refresh_btn.pack(side=tk.LEFT, padx=5, pady=5)
-        add_btn = tb.Button(frame, text="➕ Add User", command=self.add_user, bootstyle="success-outline")
+        add_btn = tb.Button(btn_frame, text="➕ Add User", command=self.add_user, bootstyle="success-outline")
         add_btn.pack(side=tk.LEFT, padx=5, pady=5)
-        self.user_buttons = {}
         self.update_user_list()
 
     def update_user_list(self):
@@ -79,7 +95,6 @@ class VoiceSnapGUI:
                 padding=(24, 14)
             )
             user_label.pack(side=tk.LEFT, padx=(16, 12), pady=12, fill="x")
-
             hold_btn = tb.Button(
                 frame,
                 text="🎤",
@@ -88,7 +103,7 @@ class VoiceSnapGUI:
             )
             hold_btn.pack(side=tk.LEFT, padx=12, pady=12)
             hold_btn.bind('<ButtonPress-1>', lambda e, f=friend: self.start_recording(f, False))
-            hold_btn.bind('<ButtonRelease-1>', lambda e, f=friend: self.stop_recording(f, False))
+            hold_btn.bind('<ButtonRelease-1>', lambda e, f=friend: self.stop_recording(f))
             def on_enter(e, btn=hold_btn):
                 btn.configure(bootstyle="success dark round-toolbutton")
             def on_leave(e, btn=hold_btn):
@@ -96,7 +111,6 @@ class VoiceSnapGUI:
             hold_btn.bind("<Enter>", on_enter)
             hold_btn.bind("<Leave>", on_leave)
             frame.pack(fill="x", pady=16, padx=16)
-            self.user_buttons[friend] = frame
 
     def add_user(self):
         target = simpledialog.askstring("Add User", "Enter username:")
@@ -106,18 +120,21 @@ class VoiceSnapGUI:
             self.update_user_list()
 
     def start_recording(self, target, is_group):
-        self.recording_filename = f"{self.username}_to_{target}.wav"
+        self.recording_indicator.pack()
         self.stop_event = threading.Event()
-        def after_record():
-            self.client.send_voice(target, is_group, self.recording_filename)
-        self.recording_thread = threading.Thread(
-            target=record_audio, args=(self.recording_filename, self.stop_event, MAX_VOICE_DURATION, after_record)
-        )
+        def after_record(audio_bytes):
+            self.recording_indicator.pack_forget()
+            self.client.send_voice(target, is_group, audio_bytes)
+        def record_and_send():
+            from audio_utils import record_audio_to_bytes
+            audio_bytes = record_audio_to_bytes(self.stop_event, MAX_VOICE_DURATION)
+            after_record(audio_bytes)
+        self.recording_thread = threading.Thread(target=record_and_send)
         self.recording_thread.start()
 
-    def stop_recording(self, target, is_group):
+    def stop_recording(self, target):
         if hasattr(self, 'stop_event'):
-            self.stop_event.set()  # This will stop recording immediately
+            self.stop_event.set()
 
     def init_group_tab(self):
         frame = tb.Frame(self.group_tab, padding=10, bootstyle="light")

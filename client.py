@@ -1,8 +1,10 @@
 # client.py
 import socket
 import threading
-import pickle
 import time
+import io
+import wave
+import simpleaudio as sa
 from config import SERVER_HOST, SERVER_PORT, BUFFER_SIZE
 from audio_utils import play_audio
 from net_utils import send_packet, recv_packet
@@ -17,7 +19,6 @@ class VoiceClient:
         self.groups = []
         self.on_friend_request = on_friend_request
         self.on_group_invite = on_group_invite
-        self.received_messages = {}  # {user/group: [filename, ...]}
         threading.Thread(target=self.listen, daemon=True).start()
 
     def listen(self):
@@ -35,20 +36,18 @@ class VoiceClient:
                 break
 
     def handle_packet(self, packet):
-        print("Received packet:", packet)  # Debug: see all incoming packets
+        # print("Received packet:", packet)  # Uncomment for debugging
         if packet['type'] == 'voice':
-            filename = f"recv_{packet['from']}_{int(time.time())}.wav"
-            with open(filename, 'wb') as f:
-                f.write(packet['data'])
-            # Store for playback
-            self.received_messages.setdefault(packet['from'], []).append(filename)
-            play_audio(filename)  # <-- This auto-plays the message!
+            # Play audio from bytes in memory
+            with io.BytesIO(packet['data']) as buf:
+                with wave.open(buf, 'rb') as wf:
+                    wave_obj = sa.WaveObject.from_wave_read(wf)
+                    play_obj = wave_obj.play()
+                    play_obj.wait_done()
         elif packet['type'] == 'friend_request':
-            print(f"Friend request from {packet['from']}")
             if self.on_friend_request:
                 self.on_friend_request(packet['from'])
         elif packet['type'] == 'group_invite':
-            print(f"Group invite to {packet['group']}")
             if self.on_group_invite:
                 self.on_group_invite(packet['group'])
         elif packet['type'] == 'friends_list':
@@ -56,15 +55,13 @@ class VoiceClient:
         elif packet['type'] == 'groups_list':
             self.groups = packet['groups']
 
-    def send_voice(self, target, is_group, filename):
-        with open(filename, 'rb') as f:
-            data = f.read()
+    def send_voice(self, target, is_group, audio_bytes):
         packet = {
             'type': 'voice',
             'from': self.username,
             'to': target,
             'is_group': is_group,
-            'data': data
+            'data': audio_bytes
         }
         send_packet(self.sock, packet)
 
@@ -124,6 +121,6 @@ class VoiceClient:
         return list(self.groups)
 
     def close(self):
+        # Optionally notify server before closing, if server handles it
+        # send_packet(self.sock, {'type': 'close_connection', 'from': self.username})
         self.sock.close()
-        
-        send_packet(self.sock, {'type': 'close_connection', 'from': self.username})

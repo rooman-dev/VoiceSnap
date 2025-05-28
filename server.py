@@ -2,7 +2,6 @@
 import socket
 import threading
 import time
-import os
 from config import SERVER_HOST, SERVER_PORT, BUFFER_SIZE, COOLDOWN_SECONDS
 from net_utils import send_packet, recv_packet
 
