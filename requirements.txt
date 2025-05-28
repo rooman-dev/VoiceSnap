@@ -1,0 +1,5 @@
+sounddevice
+scipy
+simpleaudio
+tk
+PyQt5

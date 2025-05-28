@@ -7,6 +7,8 @@ from client import VoiceClient
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 
+MAX_VOICE_DURATION = 30  # seconds, can be adjusted or made into a setting
+
 class VoiceSnapGUI:
     def __init__(self, username):
         self.username = username
@@ -109,13 +111,13 @@ class VoiceSnapGUI:
         def after_record():
             self.client.send_voice(target, is_group, self.recording_filename)
         self.recording_thread = threading.Thread(
-            target=record_audio, args=(self.recording_filename, self.stop_event, 30, after_record)
+            target=record_audio, args=(self.recording_filename, self.stop_event, MAX_VOICE_DURATION, after_record)
         )
         self.recording_thread.start()
 
     def stop_recording(self, target, is_group):
         if hasattr(self, 'stop_event'):
-            self.stop_event.set()
+            self.stop_event.set()  # This will stop recording immediately
 
     def init_group_tab(self):
         frame = tb.Frame(self.group_tab, padding=10, bootstyle="light")
@@ -133,6 +135,8 @@ class VoiceSnapGUI:
         for widget in self.group_list_frame.winfo_children():
             widget.destroy()
         groups = self.client.get_groups() if self.client else []
+        if groups is None:
+            groups = []
         for group in groups:
             frame = tb.Frame(self.group_list_frame, bootstyle="light")
             tb.Label(frame, text=group, width=20, anchor="w", bootstyle="light").pack(side=tk.LEFT, padx=5)

@@ -35,6 +35,7 @@ class VoiceClient:
                 break
 
     def handle_packet(self, packet):
+        print("Received packet:", packet)  # Debug: see all incoming packets
         if packet['type'] == 'voice':
             filename = f"recv_{packet['from']}_{int(time.time())}.wav"
             with open(filename, 'wb') as f:
@@ -115,7 +116,7 @@ class VoiceClient:
             'type': 'get_groups',
             'from': self.username
         })
-        # Wait for the groups list to be updated by handle_packet
+        # Wait for the server to send the updated group list and update self.groups
         for _ in range(10):
             if self.groups:
                 return list(self.groups)
@@ -124,3 +125,5 @@ class VoiceClient:
 
     def close(self):
         self.sock.close()
+        
+        send_packet(self.sock, {'type': 'close_connection', 'from': self.username})
