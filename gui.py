@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 import threading
+
 from client import VoiceClient
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
