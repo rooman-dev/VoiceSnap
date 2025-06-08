@@ -127,7 +127,7 @@ class VoiceSnapGUI:
             self.recording_indicator.pack_forget()
             self.client.send_voice(target, is_group, audio_bytes)
         def record_and_send():
-            from audio_utils import record_audio_to_bytes
+            from server import record_audio_to_bytes
             audio_bytes = record_audio_to_bytes(self.stop_event, MAX_VOICE_DURATION)
             after_record(audio_bytes)
         self.recording_thread = threading.Thread(target=record_and_send)

@@ -3,7 +3,7 @@ import socket
 import threading
 import time
 from config import SERVER_HOST, SERVER_PORT, BUFFER_SIZE, COOLDOWN_SECONDS
-from net_utils import send_packet, recv_packet
+from client import send_packet, recv_packet
 
 clients = {}         # username -> socket
 user_friends = {}    # username -> set of accepted friends
