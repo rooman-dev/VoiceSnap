@@ -1,25 +1,30 @@
-VoiceSnap is a modern, real-time voice messaging application built with Python. It enables users to send and receive short audio messages instantly—just like a digital walkie-talkie—across a local network or the internet. VoiceSnap features a beautiful, responsive GUI, friend and group management, and automatic playback of received messages for a seamless, interactive experience.
+# 🎤 VoiceSnap – Push-to-Talk Desktop Voice Communication
 
-Features
-🎤 Push-to-Talk Voice Messaging: Instantly record and send voice messages to friends or groups with a single button press.
-🚀 Walkie-Talkie Experience: Received messages play automatically, making conversations fast and natural.
-👥 Friend & Group Management: Add friends, accept requests, create groups, and manage group invites easily.
-🖥️ Modern GUI: Built with ttkbootstrap for a clean, rounded, and user-friendly interface.
-🔒 Private & Group Chats: Communicate one-on-one or in groups.
-🔄 Live Refresh: Instantly update user and group lists.
-⏱️ Message Cooldowns: Prevents spam by enforcing a cooldown between messages.
-💻 Cross-Platform: Works on Windows, macOS, and Linux (Python 3.8+).
-Tech Stack
-Python 3.8+
-Tkinter & ttkbootstrap for the GUI
-sounddevice and simpleaudio for audio recording and playback
-Sockets for real-time networking
-pickle for message serialization
+**VoiceSnap** is a real-time, push-to-talk (PTT) voice communication platform built with Python. Inspired by walkie-talkie-style simplicity, VoiceSnap allows users to send short voice messages to individuals or groups over a network, using a modern desktop interface.
 
-Contributing
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+---
 
-License
-MIT License
+## ✨ Features
 
-VoiceSnap – The fastest way to talk with your friends, hands-free!
+- 🎙️ **Push-to-Talk**: Record and send voice clips to friends or groups with a single click.
+- 👥 **Friend & Group System**: Send friend requests, accept them, and create voice chat groups.
+- 🖥️ **Modern Multi-Pane GUI**: Built with Tkinter, organized into Users, Groups, Logs, and Settings.
+- 🔊 **Real-Time Audio**: Uses `sounddevice` and `pygame` for low-latency voice playback and recording.
+- 📡 **Socket-Based Client-Server Architecture**: Lightweight and efficient networking using Python sockets.
+- 🧵 **Multi-threaded Design**: Responsive GUI and concurrent voice transmission.
+
+---
+
+## 🛠 Tech Stack
+
+- **Language**: Python 3.11+
+- **Libraries**: `Tkinter`, `socket`, `threading`, `sounddevice`, `pygame`, `scipy`, `simpleaudio`
+- **Structure**:
+  - `gui.py`: Main GUI with four windows and live updates
+  - `client.py`: Client-side logic and socket communication
+  - `server.py`: Central server handling users, groups, and messages
+  - `audio_utils.py`: Handles voice recording and playback
+  - `config.py`: Constants like IPs, ports, and cooldowns
+
+---
+
